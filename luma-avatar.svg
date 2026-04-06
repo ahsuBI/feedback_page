@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#3D2E56"/>
+      <stop offset="100%" stop-color="#2A1F3D"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="100" fill="url(#bg)"/>
+
+  <!-- Petals -->
+  <ellipse cx="100" cy="62" rx="13" ry="22" fill="#E8B4C8" opacity="0.9"/>
+  <ellipse cx="100" cy="138" rx="13" ry="22" fill="#E8B4C8" opacity="0.9"/>
+  <ellipse cx="62" cy="100" rx="22" ry="13" fill="#E8B4C8" opacity="0.9"/>
+  <ellipse cx="138" cy="100" rx="22" ry="13" fill="#E8B4C8" opacity="0.9"/>
+
+  <!-- Diagonal petals -->
+  <ellipse cx="73" cy="73" rx="13" ry="22" fill="#C4A0C0" opacity="0.85" transform="rotate(-45 73 73)"/>
+  <ellipse cx="127" cy="73" rx="13" ry="22" fill="#C4A0C0" opacity="0.85" transform="rotate(45 127 73)"/>
+  <ellipse cx="73" cy="127" rx="13" ry="22" fill="#C4A0C0" opacity="0.85" transform="rotate(45 73 127)"/>
+  <ellipse cx="127" cy="127" rx="13" ry="22" fill="#C4A0C0" opacity="0.85" transform="rotate(-45 127 127)"/>
+
+  <!-- Center circle -->
+  <circle cx="100" cy="100" r="28" fill="#FAF7F5"/>
+
+  <!-- Letter L -->
+  <text x="100" y="112" text-anchor="middle" font-family="Georgia, serif" font-size="28" font-weight="600" fill="#2A1F3D" letter-spacing="1">L</text>
+</svg>
