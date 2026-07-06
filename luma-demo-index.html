@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luma Cosmetics Feedback Chatbot · Aryna Hsu</title>
+  <meta name="description" content="Live demo: an IBM Watson Assistant chatbot that collects customer feedback and rewards participation with a gamified spin wheel.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #16211C;
+      --green: #0E5A43;
+      --green-dk: #0A4432;
+      --muted: #5C7268;
+      --line: #E3E9E6;
+      --tint: #F3F7F5;
+      --display: "Schibsted Grotesk", system-ui, sans-serif;
+      --body: "Inter", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--body);
+      font-size: 1.0625rem;
+      line-height: 1.65;
+      color: var(--ink);
+      background: #FFFFFF;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+    .mono { font-family: var(--mono); }
+    a {
+      color: var(--green);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 120ms ease, color 120ms ease;
+    }
+    a:hover { color: var(--green-dk); border-bottom-color: currentColor; }
+    a:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: 2px; }
+
+    header.site {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 28px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    header.site .name {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 1.125rem;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+    header.site .name:hover { color: var(--green); border-bottom-color: transparent; }
+    header.site .back { font-size: 0.9375rem; font-weight: 500; color: var(--muted); }
+    header.site .back:hover { color: var(--green); }
+
+    main { padding: 56px 0 96px; }
+
+    .kicker {
+      font-family: var(--mono);
+      font-size: 0.8125rem;
+      letter-spacing: 0.02em;
+      color: var(--green);
+      margin: 0 0 16px;
+    }
+    h1 {
+      font-family: var(--display);
+      font-weight: 600;
+      font-size: clamp(1.625rem, 4vw, 2.25rem);
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin: 0 0 16px;
+    }
+    .lede { font-size: 1.125rem; color: var(--muted); margin: 0 0 32px; }
+
+    .try {
+      background: var(--tint);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 0 0 40px;
+    }
+    .try h2 {
+      font-family: var(--display);
+      font-weight: 600;
+      font-size: 1rem;
+      margin: 0 0 10px;
+    }
+    .try ol { margin: 0; padding-left: 20px; }
+    .try li { margin-bottom: 6px; }
+    .try li:last-child { margin-bottom: 0; }
+    .try .hint { color: var(--muted); }
+
+    h2.section {
+      font-family: var(--display);
+      font-weight: 600;
+      font-size: 1.25rem;
+      letter-spacing: -0.01em;
+      margin: 40px 0 8px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+    .meta {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin: 12px 0 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="site">
+    <a class="name" href="https://ahsubi.github.io/">Aryna Hsu</a>
+    <a class="back" href="https://ahsubi.github.io/#projects">&larr; Back to projects</a>
+  </header>
+
+  <main>
+    <p class="kicker">Live demo</p>
+    <h1>Luma Cosmetics feedback chatbot</h1>
+    <p class="lede">
+      A conversational agent that collects customer feedback and rewards
+      participation with a gamified spin wheel. Built with IBM Watson Assistant;
+      I designed the conversation flows and deployed the front end.
+    </p>
+
+    <div class="try">
+      <h2>Try it</h2>
+      <ol>
+        <li>Open the chat bubble in the bottom-right corner of this page.</li>
+        <li>Tell Luma about a recent purchase &mdash; good or bad.</li>
+        <li>Finish the feedback flow to unlock the spin wheel and win a reward.</li>
+      </ol>
+      <p class="hint">The assistant may take a few seconds to load on first visit.</p>
+    </div>
+
+    <h2 class="section">How it works</h2>
+    <p>
+      The bot guides customers through a short feedback conversation: it identifies
+      the product, captures sentiment and specifics, and routes complaints differently
+      from praise. Completing the flow triggers the spin wheel, turning a chore
+      (giving feedback) into a small game &mdash; which is the point: response rates
+      rise when there's something in it for the customer.
+    </p>
+    <p class="meta">IBM Watson Assistant · conversation design · GitHub Pages</p>
+  </main>
+
+</div>
+
+<!-- IBM Watson Assistant web chat -->
+<script>
+  window.watsonAssistantChatOptions = {
+    integrationID: "1c59141f-e249-44e1-8706-e6e6f7ff4281",
+    region: "au-syd",
+    serviceInstanceID: "294d07ae-01cd-4674-aaee-0ff97fbe9ee9",
+    onLoad: async (instance) => { await instance.render(); }
+  };
+  setTimeout(function () {
+    const t = document.createElement('script');
+    t.src = "https://web-chat.global.assistant.watson.appdomain.cloud/versions/" +
+      (window.watsonAssistantChatOptions.clientVersion || 'latest') +
+      "/WatsonAssistantChatEntry.js";
+    document.head.appendChild(t);
+  });
+</script>
+
+</body>
+</html>
