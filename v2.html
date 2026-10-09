@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luma feedback chatbot, version 2</title>
+  <meta name="description" content="Improved version of the Luma Cosmetics feedback chatbot.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root { --display: "Schibsted Grotesk", system-ui, sans-serif; --body: "Inter", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, monospace;
+      --ink: #161F2C; --muted: #5B6675; --line: #E3E8EE; --accent: #2B579A; --accent-dk: #1F3D6E; --tint: #F2F5FA; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #fff; color: var(--ink); font-family: var(--body); font-size: 1rem; line-height: 1.6; }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+    .kicker { font-family: var(--mono); font-size: 0.8125rem; letter-spacing: 0.02em; color: var(--accent); margin: 0 0 16px; }
+    main { padding: 48px 0 96px; }
+    h1 { font-family: var(--display); font-weight: 600; font-size: clamp(1.6rem, 3.6vw, 2.2rem); line-height: 1.2; letter-spacing: -0.02em; margin: 0 0 12px; }
+    .lede { color: var(--muted); max-width: 40em; margin: 0 0 12px; }
+    .note { font-size: 0.875rem; color: var(--muted); max-width: 40em; margin: 0 0 32px; }
+
+    .luma { --deep: #2A1F3D; --pink: #E8B4C8; --pink-bg: #F3DCE5; --ink: #1D1726; --soft: #8A8296;
+      width: 100%; max-width: 420px; height: 600px; display: flex; flex-direction: column;
+      border: 1px solid #E4DFEA; border-radius: 12px; overflow: hidden; background: #fff;
+      box-shadow: 0 8px 30px rgba(42, 31, 61, 0.12); font-family: var(--body); }
+    .luma-head { background: var(--deep); color: #fff; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; }
+    .luma-head span { font-weight: 600; font-size: 1rem; }
+    .luma-head button { background: none; border: 0; color: #fff; font: inherit; font-size: 0.8125rem; opacity: 0.8; cursor: pointer; padding: 4px 6px; }
+    .luma-head button:hover { opacity: 1; }
+    .luma-log { flex: 1; overflow-y: auto; padding: 18px 16px; scroll-behavior: smooth; }
+    .row { display: flex; gap: 10px; margin-bottom: 14px; align-items: flex-start; }
+    .row.user { justify-content: flex-end; }
+    .row img { width: 32px; height: 32px; border-radius: 50%; flex: 0 0 32px; }
+    .bot-text { font-size: 0.9375rem; line-height: 1.5; color: var(--ink); }
+    .bot-text p { margin: 0 0 8px; }
+    .bot-text p:last-child { margin: 0; }
+    .bubble { background: var(--pink-bg); color: var(--ink); padding: 8px 14px; border-radius: 10px; font-size: 0.9375rem; max-width: 80%; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .chip { background: #fff; border: 1.5px solid var(--ink); border-radius: 999px; padding: 6px 14px; font: inherit; font-size: 0.875rem; color: var(--ink); cursor: pointer; }
+    .chip:hover:not(:disabled) { background: var(--pink-bg); }
+    .chip:disabled { cursor: default; border-color: #D6D1DC; color: #B5AEBF; }
+    .chip.other { border-style: dashed; }
+    .chip.picked { background: #EEEAF2; border-color: #EEEAF2; color: var(--ink); }
+    .typing { display: inline-flex; gap: 4px; padding: 6px 0; }
+    .typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--soft); animation: blink 1s infinite ease-in-out; }
+    .typing i:nth-child(2) { animation-delay: 0.15s; }
+    .typing i:nth-child(3) { animation-delay: 0.3s; }
+    @keyframes blink { 0%, 80%, 100% { opacity: 0.25; } 40% { opacity: 1; } }
+    .luma-input { border-top: 1px solid #E4DFEA; padding: 10px 12px; display: flex; gap: 8px; align-items: flex-end; }
+    .luma-input textarea { flex: 1; resize: none; border: 1.5px solid #CFC6DA; border-radius: 8px; padding: 9px 12px; font: inherit; font-size: 0.9375rem; color: var(--ink); min-height: 42px; max-height: 110px; }
+    .luma-input textarea:focus { outline: none; border-color: var(--deep); }
+    .luma-input textarea:disabled { background: #FAF9FB; border-color: #EAE6EF; }
+    .luma-input button { background: var(--deep); color: #fff; border: 0; border-radius: 8px; padding: 10px 14px; font: inherit; font-size: 0.875rem; cursor: pointer; }
+    .luma-input button:disabled { background: #D6D1DC; cursor: default; }
+    .skip { background: none; border: 0; color: var(--soft); font: inherit; font-size: 0.8125rem; text-decoration: underline; cursor: pointer; padding: 0; margin-top: 8px; }
+    .spin-btn { margin-top: 10px; background: var(--deep); color: #fff; border: 0; border-radius: 999px; padding: 9px 18px; font: inherit; font-size: 0.9375rem; font-weight: 600; cursor: pointer; }
+    .luma-foot { font-size: 0.75rem; color: var(--soft); padding: 0 14px 10px; }
+
+    .overlay { position: fixed; inset: 0; background: rgba(20, 14, 32, 0.7); display: none; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
+    .overlay.open { display: flex; }
+    .overlay-box { position: relative; width: min(560px, 100%); height: min(720px, 92vh); border-radius: 14px; overflow: hidden; background: #1a0a2e; }
+    .overlay-box iframe { width: 100%; height: 100%; border: 0; display: block; }
+    .overlay-close { position: absolute; top: 10px; right: 10px; z-index: 2; background: rgba(255,255,255,0.15); color: #fff; border: 0; border-radius: 999px; width: 34px; height: 34px; font-size: 1.1rem; cursor: pointer; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <main>
+    <p class="kicker">Portfolio demo &middot; Version 2</p>
+    <h1>Luma feedback chatbot, version 2</h1>
+    <p class="lede">Luma is a fictional cosmetics brand. This version fixes the gaps I found in the original course prototype, while keeping the flow just as quick for satisfied customers.</p>
+    <p class="note">This is a demo. Nothing you choose or type is saved.</p>
+
+    <section class="luma" aria-label="Luma chatbot">
+      <div class="luma-head"><span>Luma &#10024;</span><button type="button" id="restart">Start over</button></div>
+      <div class="luma-log" id="log" aria-live="polite"></div>
+      <div class="luma-input">
+        <textarea id="free" rows="1" placeholder="Choose an option above" disabled></textarea>
+        <button type="button" id="send" disabled>Send</button>
+      </div>
+      <div class="luma-foot">Version 2</div>
+    </section>
+  </main>
+</div>
+
+<div class="overlay" id="overlay" role="dialog" aria-label="Spin wheel">
+  <div class="overlay-box">
+    <button class="overlay-close" id="closeWheel" aria-label="Close">&times;</button>
+    <iframe id="wheel" title="Luma spin wheel" src="about:blank"></iframe>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// Luma feedback chatbot, VERSION 2
+// Changes from version 1:
+// 1. "Other" on every follow-up question, but not on the first
+//    question, which only decides the path.
+// 2. The return process now gets a follow-up when it isn't Good,
+//    the same rule the refund already followed.
+// 3. Follow-up wording depends on the rating: "Okay" asks what
+//    could have been better, "Poor" asks what went wrong.
+// 4. The bot acknowledges an Okay or Poor rating before asking more,
+//    and varies what it says.
+// 5. A route to a person: offered when both the return and the
+//    refund were Poor, or when a customer reports a skin reaction.
+// ============================================================
+
+const AVATAR = 'luma-avatar.svg';
+const WHEEL_URL = 'https://ahsubi.github.io/Spin-wheel/';
+const RATING = ['Good \u{1F642}', 'Okay \u{1F610}', 'Poor \u{1F641}'];
+const OTHER = 'Other';
+
+const isGood = a => (a || '').startsWith('Good');
+const isPoor = a => (a || '').startsWith('Poor');
+
+// Answers given so far, so later steps can react to earlier ones
+let state = {};
+
+// Varied acknowledgements, picked in turn so the bot doesn't repeat itself
+const ACK_OKAY = ['Thanks for letting us know.', 'Thanks, that\u2019s helpful.', 'Noted, thank you.'];
+const ACK_POOR = ['Sorry it wasn\u2019t as smooth as it should have been.', 'Sorry about that. That\u2019s not the experience we want you to have.', 'We\u2019re sorry to hear that.'];
+let ackTurn = 0;
+function ack(rating) {
+  const list = isPoor(rating) ? ACK_POOR : ACK_OKAY;
+  return list[(ackTurn++) % list.length];
+}
+
+function logEvent(eventName, details = {}) {
+  console.log('[luma event]', eventName, details);
+}
+
+// Each step: what the bot says (a list, or a function of the answers so far),
+// the answer options, whether it offers "Other", and which step comes next.
+const FLOW = {
+  start: {
+    say: ['Hi! I\u2019m Luma \u{1F484}. What would you like to give feedback on?'],
+    options: ['Recent purchase', 'Refund or return'],
+    next: a => a === 'Recent purchase' ? 'expectations' : 'returnReason'
+  },
+
+  // Recent purchase branch
+  expectations: {
+    say: ['Great! Let\u2019s talk about your recent purchase.', 'How did the product meet your expectations?'],
+    options: RATING,
+    next: a => isGood(a) ? 'likedMost' : 'mainIssue'
+  },
+  likedMost: {
+    say: ['Glad to hear it! What did you like most?'],
+    options: ['Quality', 'Packaging', 'Price', 'Colour or appearance'],
+    other: true,
+    next: () => 'delivery'
+  },
+  mainIssue: {
+    say: s => [ack(s.expectations), isPoor(s.expectations) ? 'What went wrong?' : 'What could have been better?'],
+    options: ['Quality issue', 'Skin reaction', 'Not as expected', 'Packaging'],
+    other: true,
+    next: a => a === 'Skin reaction' ? 'skinCare' : 'deliveryAfterIssue'
+  },
+  skinCare: {
+    say: ['I\u2019m really sorry to hear that. If the reaction is severe or doesn\u2019t settle, please stop using the product and seek medical advice.', 'Would you like someone from our customer care team to contact you about it?'],
+    options: ['Yes, please', 'No, thanks'],
+    next: a => a === 'Yes, please' ? 'skinCareYes' : 'delivery'
+  },
+  skinCareYes: {
+    say: ['Thank you. Someone from our team will be in touch.', 'How was the delivery experience?'],
+    options: RATING,
+    next: a => isGood(a) ? 'recommend' : 'deliveryImprove'
+  },
+  deliveryAfterIssue: {
+    say: ['We\u2019ll look into this and make it right \u{1F49B}', 'How was the delivery experience?'],
+    options: RATING,
+    next: a => isGood(a) ? 'recommend' : 'deliveryImprove'
+  },
+  delivery: {
+    say: ['How was the delivery experience?'],
+    options: RATING,
+    next: a => isGood(a) ? 'recommend' : 'deliveryImprove'
+  },
+  deliveryImprove: {
+    say: s => [ack(s.lastRating), isPoor(s.lastRating) ? 'What went wrong with the delivery?' : 'What could have been better about the delivery?'],
+    options: ['Speed', 'Packaging', 'Tracking'],
+    other: true,
+    next: () => 'recommendAfterDelivery'
+  },
+  recommendAfterDelivery: {
+    say: ['Got it \u{1F44D} This helps us improve delivery.', 'Would you recommend this product to others?'],
+    options: ['Yes', 'Maybe', 'No'],
+    next: () => 'anythingElse'
+  },
+  recommend: {
+    say: ['Would you recommend this product to others?'],
+    options: ['Yes', 'Maybe', 'No'],
+    next: () => 'anythingElse'
+  },
+
+  // Refund or return branch
+  returnReason: {
+    say: ['We\u2019re sorry you had to return your product. What was the main reason?'],
+    options: ['Damaged product', 'Wrong item', 'Didn\u2019t like it', 'Quality not as imagined'],
+    other: true,
+    next: () => 'returnProcess'
+  },
+  returnProcess: {
+    say: ['How was the return process?'],
+    options: RATING,
+    next: a => isGood(a) ? 'refundProcess' : 'returnIssue'
+  },
+  returnIssue: {
+    say: s => [ack(s.returnProcess), isPoor(s.returnProcess) ? 'What went wrong with the return?' : 'What could have been better about the return?'],
+    options: ['Instructions weren\u2019t clear', 'Hard to find a drop-off point', 'Slow to confirm my return'],
+    other: true,
+    next: () => 'refundProcess'
+  },
+  refundProcess: {
+    say: ['How was the refund process?'],
+    options: RATING,
+    next: a => isGood(a) ? 'anythingElse' : 'refundIssue'
+  },
+  refundIssue: {
+    say: s => [ack(s.refundProcess), isPoor(s.refundProcess) ? 'What went wrong with the refund?' : 'What could have been better about the refund?'],
+    options: ['Took too long', 'Not received', 'Incorrect amount', 'No updates on progress'],
+    other: true,
+    next: () => (isPoor(state.returnProcess) && isPoor(state.refundProcess)) ? 'handoff' : 'anythingElse'
+  },
+  handoff: {
+    say: ['I\u2019m sorry both the return and the refund let you down.', 'Would you like someone from our team to get in touch?'],
+    options: ['Yes, please', 'No, thanks'],
+    next: a => a === 'Yes, please' ? 'handoffYes' : 'anythingElse'
+  },
+
+  // Endings
+  handoffYes: {
+    say: ['Thank you. Our customer care team will follow up with you about this return.', 'In the meantime, is there anything else you\u2019d like to tell us?'],
+    freeText: true
+  },
+  anythingElse: { say: ['Anything else you\u2019d like to tell us?'], freeText: true }
+};
+
+const log = document.getElementById('log');
+const free = document.getElementById('free');
+const send = document.getElementById('send');
+let busy = false;
+let textMode = null;
+
+function scrollDown() { log.scrollTop = log.scrollHeight; }
+function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; }
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function openTextBox(placeholder) {
+  free.disabled = false; send.disabled = false;
+  free.placeholder = placeholder;
+  free.focus();
+}
+function closeTextBox() {
+  free.disabled = true; send.disabled = true;
+  free.value = '';
+  free.placeholder = 'Choose an option above';
+  textMode = null;
+  log.querySelectorAll('.skip').forEach(s => s.remove());
+}
+
+async function botSay(lines) {
+  const row = el('div', 'row');
+  const img = el('img'); img.src = AVATAR; img.alt = '';
+  const text = el('div', 'bot-text');
+  text.appendChild(el('span', 'typing', '<i></i><i></i><i></i>'));
+  row.append(img, text); log.appendChild(row); scrollDown();
+  await wait(650);
+  text.innerHTML = '';
+  lines.forEach(l => text.appendChild(el('p', '', l)));
+  scrollDown();
+  return text;
+}
+
+function userSay(t) {
+  const row = el('div', 'row user');
+  const b = el('div', 'bubble'); b.textContent = t;
+  row.appendChild(b); log.appendChild(row); scrollDown();
+}
+
+function answer(stepId, value, isOther) {
+  const step = FLOW[stepId];
+  state[stepId] = isOther ? OTHER : value;
+  if (step.options === RATING) state.lastRating = value;
+  logEvent('answer_given', { step: stepId, answer: value, is_other: isOther });
+  go(step.next(isOther ? OTHER : value));
+}
+
+async function go(id) {
+  busy = true;
+  const step = FLOW[id];
+  const lines = typeof step.say === 'function' ? step.say(state) : step.say;
+  const text = await botSay(lines);
+
+  if (step.freeText) {
+    textMode = { type: 'final' };
+    openTextBox('Type something\u2026');
+    const skip = el('button', 'skip', 'Nothing else, skip');
+    skip.type = 'button';
+    skip.onclick = () => finish('');
+    text.appendChild(skip);
+  } else {
+    const chips = el('div', 'chips');
+    const lockChips = picked => {
+      chips.querySelectorAll('.chip').forEach(x => x.disabled = true);
+      picked.classList.add('picked');
+    };
+    step.options.forEach(opt => {
+      const c = el('button', 'chip'); c.type = 'button'; c.textContent = opt;
+      c.onclick = () => {
+        if (busy) return;
+        lockChips(c);
+        userSay(opt);
+        answer(id, opt, false);
+      };
+      chips.appendChild(c);
+    });
+    if (step.other) {
+      const o = el('button', 'chip other'); o.type = 'button'; o.textContent = OTHER;
+      o.onclick = () => {
+        if (busy) return;
+        lockChips(o);
+        textMode = { type: 'other', stepId: id };
+        openTextBox('Tell us in your own words\u2026');
+        const skip = el('button', 'skip', 'Skip this question');
+        skip.type = 'button';
+        skip.onclick = () => {
+          closeTextBox();
+          userSay('(skipped)');
+          answer(id, '', true);
+        };
+        text.appendChild(skip);
+        scrollDown();
+      };
+      chips.appendChild(o);
+    }
+    text.appendChild(chips);
+  }
+  scrollDown();
+  busy = false;
+}
+
+async function finish(msg) {
+  closeTextBox();
+  if (msg) userSay(msg);
+  const text = await botSay(['Thank you! Almost done.', 'Here\u2019s a little something for you \u{1F381}']);
+  const btn = el('button', 'spin-btn', 'Spin the wheel'); btn.type = 'button';
+  btn.onclick = openWheel;
+  text.appendChild(btn); scrollDown();
+}
+
+function openWheel() {
+  const f = document.getElementById('wheel');
+  if (f.src === 'about:blank') f.src = WHEEL_URL;
+  document.getElementById('overlay').classList.add('open');
+}
+document.getElementById('closeWheel').onclick = () => document.getElementById('overlay').classList.remove('open');
+document.getElementById('overlay').onclick = e => { if (e.target.id === 'overlay') e.currentTarget.classList.remove('open'); };
+
+send.onclick = () => {
+  const v = free.value.trim();
+  if (!v || !textMode) return;
+  if (textMode.type === 'other') {
+    const stepId = textMode.stepId;
+    closeTextBox();
+    userSay(v);
+    answer(stepId, v, true);
+  } else {
+    finish(v);
+  }
+};
+free.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send.click(); } });
+
+document.getElementById('restart').onclick = () => {
+  log.innerHTML = '';
+  state = {};
+  ackTurn = 0;
+  closeTextBox();
+  go('start');
+};
+
+go('start');
+</script>
+</body>
+</html>
